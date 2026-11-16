@@ -1,186 +1,348 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#05080d">
 <title>MECHANICA — Skeleton Automatic</title>
 <style>
-:root{--g:#e6c07b;--t:#e8eef7;--m:#8d9aab;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px)}
+:root{
+  --g:#e6c07b;--g2:#f2d8a8;--t:#eef3fa;--m:#aab5c4;
+  --panel:rgba(10,13,18,.9);--line:rgba(212,167,96,.34);
+  --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px)
+}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;color:var(--t);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 50% 40%,#161b24 0%,#07090c 70%)}
+html,body{margin:0;height:100%;overflow:hidden;color:var(--t);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 50% 42%,#2b4059 0%,#17283d 38%,#0b1420 72%,#05080d 100%)}
+button{font:inherit}
 #app{position:fixed;inset:0}
-.p{position:fixed;z-index:5;background:rgba(10,12,16,.82);border:1px solid rgba(212,167,96,.3);border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.p{position:fixed;z-index:5;background:var(--panel);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(14px);box-shadow:0 16px 48px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.035)}
+.mobile-only{display:none!important}
 
-/* Side list (desktop) */
-#side{left:14px;top:14px;bottom:76px;width:208px;overflow:auto;padding:8px}
-.grp{font-size:10px;letter-spacing:.2em;color:#a08a5a;text-transform:uppercase;margin:12px 6px 4px}
-.it{display:block;width:100%;text-align:left;background:none;border:0;color:#b9c4d2;font:inherit;font-size:12.5px;padding:6px 8px;border-radius:6px;cursor:pointer}
-.it:hover{background:rgba(255,255,255,.07)}.it.on{background:rgba(212,167,96,.2);color:var(--g)}
+/* Branded first-paint loader */
+#loader{
+  position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;
+  background:radial-gradient(ellipse at 50% 42%,#2b4059 0%,#17283d 38%,#0b1420 72%,#05080d 100%);
+  transition:opacity .42s ease,visibility .42s
+}
+#loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.loader-inner{width:min(290px,82vw);text-align:center;color:var(--g2)}
+.loader-mark{
+  width:76px;height:76px;margin:0 auto 20px;position:relative;border-radius:50%;
+  border:1px solid rgba(230,192,123,.25);box-shadow:0 0 42px rgba(43,64,89,.42)
+}
+.loader-mark::before{
+  content:"";position:absolute;inset:7px;border-radius:50%;
+  background:conic-gradient(from 12deg,transparent 0 8%,#f2d8a8 8% 10%,transparent 10% 24%,#b98c4d 24% 27%,transparent 27% 48%,#f2d8a8 48% 51%,transparent 51% 73%,#b98c4d 73% 76%,transparent 76%);
+  animation:loader-turn 2.4s linear infinite
+}
+.loader-mark::after{
+  content:"";position:absolute;inset:21px;border-radius:50%;border:1px solid rgba(242,216,168,.65);
+  background:radial-gradient(circle at 40% 35%,#2d3e52,#080d14 72%);
+  box-shadow:inset 0 0 0 4px rgba(230,192,123,.07)
+}
+.loader-brand{margin:0;color:var(--g2);font-size:18px;font-weight:560;letter-spacing:.28em}
+.loader-status{margin:9px 0 15px;color:#b7c6d8;font-size:11px;letter-spacing:.08em}
+.loader-track{height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.loader-track::after{content:"";display:block;width:46%;height:100%;background:linear-gradient(90deg,transparent,#e6c07b,#f2d8a8,transparent);animation:loader-sweep 1.3s ease-in-out infinite}
+@keyframes loader-turn{to{transform:rotate(360deg)}}
+@keyframes loader-sweep{from{transform:translateX(-110%)}to{transform:translateX(240%)}}
+@media(prefers-reduced-motion:reduce){.loader-mark::before,.loader-track::after{animation:none}.loader-track::after{width:100%;opacity:.45}}
+
+/* Side part list */
+#side{
+  left:14px;top:14px;bottom:calc(76px + var(--safe-b));width:218px;overflow:auto;padding:10px;
+  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(230,192,123,.35) transparent
+}
+#side .side-head{display:flex;align-items:flex-start;gap:8px;padding:5px 6px 9px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:4px}
+#side .side-head-copy{flex:1;min-width:0}
+#side .side-close{display:none;width:34px;height:34px;min-height:34px;padding:0;font-size:15px}
+#side .side-title{margin:0;color:var(--g);font-size:15px;font-weight:560;letter-spacing:.02em}
+#side .side-help{margin:4px 0 0;color:var(--m);font-size:11px;line-height:1.4}
+.glossary-link{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:0;border:0;background:none;color:var(--g2);font-size:11px;cursor:pointer}
+.glossary-link:hover{text-decoration:underline;text-underline-offset:3px}
+.grp{font-size:10px;letter-spacing:.18em;color:#b79a65;text-transform:uppercase;margin:14px 6px 5px}
+.it{display:block;width:100%;text-align:left;background:none;border:0;color:#c5cfdb;font:inherit;font-size:13px;line-height:1.25;padding:8px 9px;border-radius:7px;cursor:pointer}
+.it:hover{background:rgba(255,255,255,.07);color:#fff}.it.on{background:rgba(212,167,96,.2);color:var(--g2)}
 
 /* Bottom control bar */
-#bar{bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 20px)}
-.b{background:linear-gradient(180deg,#2a2013,#1a140c);border:1px solid rgba(212,167,96,.45);color:var(--g);font:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 11px;border-radius:8px;cursor:pointer}
-.b:hover{border-color:var(--g)}.b.on{background:var(--g);color:#1a140c}
-.sep{width:1px;background:rgba(255,255,255,.12);margin:0 3px}
+#bar{
+  bottom:calc(14px + var(--safe-b));left:50%;transform:translateX(-50%);display:flex;gap:6px;
+  width:max-content;padding:8px;flex-wrap:nowrap;justify-content:flex-start;max-width:calc(100% - 28px);
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;scroll-behavior:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(230,192,123,.35) transparent;touch-action:pan-x;
+  -webkit-user-select:none;user-select:none
+}
+#bar::-webkit-scrollbar{height:4px}
+#bar::-webkit-scrollbar-thumb{background:rgba(230,192,123,.35);border-radius:4px}
+.b{
+  flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:38px;
+  background:linear-gradient(180deg,#2a2013,#1a140c);border:1px solid rgba(212,167,96,.45);
+  color:var(--g);font:inherit;font-size:11px;line-height:1;letter-spacing:.09em;text-transform:uppercase;
+  padding:9px 11px;border-radius:8px;cursor:pointer;touch-action:manipulation;
+  transition:background .15s,border-color .15s,color .15s,transform .15s
+}
+.b:hover{border-color:var(--g);color:var(--g2)}.b:active{transform:translateY(1px)}
+.b:focus-visible,.it:focus-visible,.glossary-link:focus-visible,.depth-btn:focus-visible{outline:2px solid var(--g2);outline-offset:2px}
+.b.on{background:var(--g);border-color:var(--g2);color:#171108}
+.b:disabled{opacity:.4;cursor:default;transform:none}
+.sep{flex:0 0 1px;width:1px;background:rgba(255,255,255,.12);margin:3px}
+.bar-scroll{
+  display:none;position:fixed;bottom:calc(14px + var(--safe-b));z-index:7;width:40px;height:54px;
+  align-items:center;justify-content:center;padding:0;border:0;background:transparent;color:var(--g2);
+  font:inherit;font-size:25px;line-height:1;cursor:pointer;touch-action:manipulation
+}
+.bar-scroll.on{display:flex}
+.bar-scroll:disabled{opacity:.26}
+#barPrev{left:calc(6px + env(safe-area-inset-left,0px));background:linear-gradient(90deg,rgba(9,11,15,.98) 55%,rgba(9,11,15,0))}
+#barNext{right:calc(6px + env(safe-area-inset-right,0px));background:linear-gradient(270deg,rgba(9,11,15,.98) 55%,rgba(9,11,15,0))}
+.bar-scroll:focus-visible{outline:2px solid var(--g2);outline-offset:-3px;border-radius:10px}
 
-/* Info panel (desktop) */
-#info{right:14px;top:14px;width:310px;padding:16px 18px;display:none}
-#info h2{margin:2px 0 8px;font-size:17px;color:var(--g);font-weight:500}
-#info .tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--m)}
-#info p{margin:0 0 10px;font-size:13.5px;line-height:1.55;color:#c3ceda}
-#info .sp{font-size:12px;color:var(--g);border-top:1px solid rgba(255,255,255,.1);padding-top:9px}
-#info .nav{display:flex;gap:6px;margin-top:12px}#info .nav .b{flex:1}
-#info .x-btn{position:absolute;top:8px;right:8px;width:26px;height:26px;padding:0;font-size:13px;line-height:1;display:none}
-#info .handle{display:none;width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);margin:0 auto 10px}
+/* Selected part panel */
+#info{
+  right:14px;top:14px;width:min(330px,calc(100% - 28px));max-height:calc(100% - 102px);
+  overflow:auto;overscroll-behavior:contain;padding:17px 18px 16px;display:none;z-index:7
+}
+#info h2{margin:3px 0 10px;font-size:21px;line-height:1.15;color:var(--g2);font-weight:540;padding-right:30px}
+#info .tag{font-size:10px;line-height:1.4;letter-spacing:.18em;text-transform:uppercase;color:var(--m)}
+#info .detail-label{margin:15px 0 4px;color:#d7b981;font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase}
+#info p{margin:0;font-size:14px;line-height:1.55;color:#d2dbe5}
+#info .sp{margin-top:15px;padding:10px 0 0;border-top:1px solid rgba(255,255,255,.1);color:var(--g);font-size:12.5px;line-height:1.45}
+#info .nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}
+#info .nav .b{font-size:10.5px;min-height:40px}
+#info .x-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;min-height:34px;padding:0;font-size:16px;display:inline-flex}
+#info .handle{display:none;width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.28);margin:0 auto 10px}
+#info .info-glossary{margin-top:12px}
 
-#tip{position:fixed;pointer-events:none;z-index:9;padding:4px 9px;border-radius:6px;background:rgba(10,12,16,.92);border:1px solid rgba(212,167,96,.4);font-size:12px;color:var(--g);opacity:0;transition:opacity .1s}
-#err{position:fixed;left:8px;bottom:8px;z-index:99;color:#f88;background:rgba(0,0,0,.85);padding:8px 10px;border:1px solid #f44;border-radius:6px;font:11px/1.4 ui-monospace,monospace;max-width:70vw;white-space:pre-wrap;display:none}
+.depth-control{display:inline-flex;gap:2px;margin:10px 0 1px;padding:2px;border:1px solid rgba(230,192,123,.22);border-radius:999px;background:rgba(0,0,0,.2)}
+.depth-btn{border:0;border-radius:999px;background:transparent;color:var(--m);font-size:10px;line-height:1;padding:7px 9px;cursor:pointer}
+.depth-btn.on{background:rgba(230,192,123,.18);color:var(--g2)}
 
-/* Backdrop for drawers/sheets on mobile */
-#backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:4;display:none;opacity:0;transition:opacity .18s}
+#tip{
+  position:fixed;pointer-events:none;z-index:12;padding:6px 10px;border-radius:7px;
+  background:rgba(10,12,16,.94);border:1px solid rgba(212,167,96,.45);font-size:12.5px;
+  color:var(--g2);opacity:0;transition:opacity .1s
+}
+#hint{
+  position:fixed;z-index:3;left:50%;top:18px;transform:translateX(-50%);pointer-events:none;
+  padding:7px 11px;border-radius:999px;background:rgba(8,10,14,.58);border:1px solid rgba(255,255,255,.08);
+  color:#aeb9c7;font-size:10.5px;letter-spacing:.08em;white-space:nowrap;backdrop-filter:blur(8px)
+}
+
+/* Optional projected labels */
+#labels{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.scene-label{
+  position:absolute;display:none;align-items:center;gap:6px;pointer-events:auto;transform:translate(-50%,-50%);
+  max-width:138px;padding:5px 8px 5px 6px;border-radius:999px;border:1px solid rgba(230,192,123,.46);
+  background:rgba(8,11,15,.88);backdrop-filter:blur(8px);color:#f4e5c9;font-size:10px;line-height:1.1;
+  letter-spacing:.02em;white-space:nowrap;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.38)
+}
+.scene-label::before{content:"";flex:0 0 5px;width:5px;height:5px;border-radius:50%;background:var(--g2);box-shadow:0 0 8px rgba(242,216,168,.8)}
+.scene-label.show{display:inline-flex}
+.scene-label:hover,.scene-label:focus-visible{border-color:var(--g2);outline:0;background:rgba(35,27,15,.96)}
+
+/* Glossary sheet */
+#glossary{
+  left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,calc(100% - 28px));
+  max-height:min(76vh,660px);overflow:auto;display:none;z-index:11;padding:18px 20px 20px;
+  overscroll-behavior:contain
+}
+#glossary.on{display:block}
+#glossary .tag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--m)}
+#glossary h2{margin:3px 0 5px;padding-right:34px;color:var(--g2);font-size:21px;font-weight:540}
+#glossary .g-intro{margin:0 0 14px;color:var(--m);font-size:12px;line-height:1.45}
+#glossary .terms{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#glossary .term{padding:11px 12px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.025)}
+#glossary dt{color:var(--g2);font-size:12.5px;font-weight:600;margin-bottom:4px}
+#glossary dd{margin:0;color:#cbd5e0;font-size:12px;line-height:1.45}
+#glossary .x-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;min-height:34px;padding:0;font-size:16px}
+#err{
+  position:fixed;left:8px;bottom:calc(74px + var(--safe-b));z-index:2000;color:#faa;
+  background:rgba(0,0,0,.9);padding:8px 10px;border:1px solid #f44;border-radius:6px;
+  font:11px/1.4 ui-monospace,monospace;max-width:min(70vw,560px);white-space:pre-wrap;display:none
+}
+
+/* Shared mobile backdrop */
+#backdrop{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:4;display:none;opacity:0;transition:opacity .18s}
 #backdrop.on{display:block;opacity:1}
 
-/* Mobile-only floating buttons */
-#mobile-tools{display:none;position:fixed;z-index:6;right:10px;top:10px;gap:6px}
-#mobile-tools .b{padding:10px 12px;font-size:12px;letter-spacing:.08em}
+/* Energy-flow tour */
+#tour{
+  right:14px;bottom:calc(76px + var(--safe-b));width:min(410px,calc(100% - 28px));
+  max-height:calc(100% - 112px);overflow:auto;padding:16px 17px;display:none;z-index:8;
+  overscroll-behavior:contain;transition:width .18s ease,padding .18s ease
+}
+#tour .tour-head{display:flex;align-items:flex-start;gap:10px}
+#tour .tour-title{min-width:0;flex:1}
+#tour .tag{font-size:10px;line-height:1.4;letter-spacing:.16em;text-transform:uppercase;color:var(--m)}
+#tour h2{margin:3px 0 9px;font-size:20px;line-height:1.18;color:var(--g2);font-weight:540}
+#tour p{margin:0;font-size:14px;line-height:1.55;color:#d2dbe5}
+#tour .tour-body{padding-top:1px}
+#tour .tour-progress{height:2px;background:rgba(255,255,255,.1);border-radius:2px;margin:0 0 13px;overflow:hidden}
+#tour .tour-progress span{display:block;width:10%;height:100%;background:linear-gradient(90deg,#b88c47,var(--g2));transition:width .22s ease}
+#tour .nav{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:14px}
+#tour .nav .b{min-height:40px;font-size:10px}
+#tour .min-btn{width:34px;height:34px;min-height:34px;padding:0;font-size:18px;line-height:1}
+#tour.min{width:min(310px,calc(100% - 28px));max-height:none;overflow:visible;padding:9px 10px;border-radius:12px}
+#tour.min h2{font-size:14px;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tour.min .tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tour.min .tour-body{display:none}
+#tour.min .min-btn{margin-left:auto}
 
-/* ---------- Mobile / small screens ---------- */
-@media(max-width:820px),(max-width:900px) and (max-height:500px){
-  #side{display:none}
+@media(max-width:820px){
+  .mobile-only{display:inline-flex!important}
   #hint{display:none}
-
-  /* Info becomes a bottom sheet */
-  #info{left:0;right:0;bottom:0;top:auto;width:100%;
-    border-radius:16px 16px 0 0;border-left:0;border-right:0;border-bottom:0;
-    max-height:52vh;overflow:auto;padding:14px 16px calc(14px + var(--safe-b));
-    transform:translateY(110%);transition:transform .22s ease;display:block;visibility:hidden}
-  #info.on{transform:translateY(0);visibility:visible}
-  #info .handle{display:block}
-  #info .x-btn{display:block}
-  #info h2{font-size:16px;margin-right:28px}
-
-  /* Control bar: single scrollable row */
-  #bar{left:8px;right:8px;bottom:calc(8px + var(--safe-b));transform:none;
-    flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;
-    padding:6px;gap:5px;max-width:none;scrollbar-width:none}
-  #bar::-webkit-scrollbar{display:none}
-  #bar .sep{flex:0 0 1px}
-  #bar .b{flex:0 0 auto;white-space:nowrap;padding:6px 7px;font-size:7.5px}
-
-  #mobile-tools{display:flex}
-  #mobile-tools .b{padding:7px 8px;font-size:8px}
-}
-
-/* Very small phones: shrink controls a touch more */
-@media(max-width:420px){
-  #bar .b{padding:5px 6px;font-size:7px}
-  #mobile-tools .b{padding:6px 7px;font-size:7.5px}
-  #info{max-height:56vh}
-}
-
-/* Energy-flow tour card */
-#tour{left:50%;transform:translateX(-50%);bottom:74px;width:min(540px,calc(100% - 24px));padding:14px 18px;display:none;z-index:7}
-#tour .tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--m)}
-#tour h2{margin:2px 0 6px;font-size:17px;color:var(--g);font-weight:500}
-#tour p{margin:0 0 10px;font-size:13.5px;line-height:1.55;color:#c3ceda}
-#tour .nav{display:flex;gap:6px}#tour .nav .b{flex:1}
-@media(max-width:820px),(max-width:900px) and (max-height:500px){
-  #tour{bottom:calc(64px + var(--safe-b));padding:12px 14px}
-  #tour p{font-size:13px;margin-bottom:8px}
-}
-
-/* Phones: compact chrome so the watch remains the visual focus. */
-@media(max-width:480px),(max-width:900px) and (max-height:500px){
-  #mobile-tools{right:6px;top:calc(6px + var(--safe-t));gap:3px}
-  #mobile-tools .b{padding:5px 6px;font-size:6.8px;letter-spacing:.055em;border-radius:6px;line-height:1.1}
-
-  #bar{left:4px;right:4px;bottom:calc(4px + var(--safe-b));gap:3px;padding:3px;border-radius:9px}
-  #bar .b{padding:4px 5px;font-size:6.5px;letter-spacing:.035em;border-radius:5px;line-height:1.1}
-  #bar .sep{margin:0 1px}
-
-  #info{
-    max-height:min(38vh,290px);max-height:min(38dvh,290px);
-    padding:8px 11px calc(38px + var(--safe-b));border-radius:12px 12px 0 0;
+  #side{
+    display:block;left:0;top:0;bottom:0;width:min(88vw,340px);max-width:340px;z-index:7;
+    border-radius:0 16px 16px 0;padding:calc(10px + var(--safe-t)) 12px calc(12px + var(--safe-b));
+    transform:translateX(-105%);visibility:hidden;transition:transform .2s ease,visibility .2s;
     overscroll-behavior:contain
   }
-  #info .handle{width:24px;height:3px;margin-bottom:7px}
-  #info .tag{font-size:7.5px;letter-spacing:.15em}
-  #info h2{font-size:13px;line-height:1.2;margin:1px 24px 4px 0}
-  #info p{font-size:10.5px;line-height:1.38;margin-bottom:6px}
-  #info .sp{font-size:9px;padding-top:6px}
-  #info .nav{margin-top:7px;gap:4px}
-  #info .nav .b{padding:4px 5px;font-size:6.5px}
-  #info .x-btn{top:5px;right:5px;width:22px;height:22px;font-size:10px;border-radius:50%}
+  #side.on{transform:translateX(0);visibility:visible}
+  #side .side-close{display:inline-flex}
+  #bar{
+    left:8px;right:8px;bottom:calc(8px + var(--safe-b));transform:none;max-width:none;
+    width:auto;padding:7px 40px;gap:6px;scrollbar-width:none;scroll-padding-inline:40px;
+    -webkit-overflow-scrolling:touch;touch-action:none
+  }
+  #bar::-webkit-scrollbar{display:none}
+  #bar .b{min-height:44px;padding:0 12px;font-size:11px;white-space:nowrap;touch-action:none}
+  .bar-scroll{display:flex;bottom:calc(8px + var(--safe-b));height:60px}
 
-  #side{padding:6px}
-  #side .grp{font-size:8px;letter-spacing:.14em;margin:8px 5px 3px}
-  #side .it{font-size:10.5px;line-height:1.2;padding:5px 6px;border-radius:5px}
+  #info{
+    left:0;right:0;bottom:0;top:auto;width:100%;max-height:min(48vh,430px);
+    overflow:auto;border-radius:18px 18px 0 0;border-left:0;border-right:0;border-bottom:0;
+    padding:9px 18px calc(17px + var(--safe-b));transform:translateY(110%);
+    transition:transform .22s ease;display:block;visibility:hidden;-webkit-overflow-scrolling:touch
+  }
+  #info.on{transform:translateY(0);visibility:visible}
+  #info .handle{display:block}
+  #info h2{font-size:20px;margin-right:32px}
 
   #tour{
-    left:4px;right:4px;bottom:calc(34px + var(--safe-b));width:auto;transform:none;
-    max-height:min(29vh,210px);max-height:min(29dvh,210px);overflow:auto;
-    padding:8px 10px 7px;border-radius:10px;overscroll-behavior:contain
+    left:8px;right:8px;bottom:calc(68px + var(--safe-b));width:auto;
+    max-height:min(43vh,360px);padding:14px 15px
   }
-  #tour .tag{font-size:7px;letter-spacing:.15em}
-  #tour h2{font-size:12px;line-height:1.2;margin:1px 0 3px}
-  #tour p{font-size:10px;line-height:1.35;margin:0 0 6px}
-  #tour .nav{gap:4px}
-  #tour .nav .b{padding:4px 5px;font-size:6.5px;line-height:1.1}
+  #tour h2{font-size:19px}
+  #tour p{font-size:13.5px;line-height:1.5}
+  #tour .nav .b{min-height:42px;padding-inline:8px}
+  #tour.min{left:auto;right:8px;width:min(310px,calc(100% - 16px));margin-left:0;padding:8px 9px}
+  #err{bottom:calc(72px + var(--safe-b))}
+  #glossary{
+    top:auto;bottom:0;left:0;right:0;transform:none;width:100%;
+    max-height:min(72vh,600px);border-radius:18px 18px 0 0;padding:12px 17px calc(18px + var(--safe-b))
+  }
+  #glossary .terms{grid-template-columns:1fr}
+}
+
+@media(max-width:420px){
+  #side{width:min(90vw,340px)}
+  #info{max-height:min(52vh,440px)}
+  #tour{max-height:min(48vh,380px)}
+  #glossary .depth-control{margin-bottom:0}
+}
+
+@media(max-width:820px) and (max-height:540px) and (orientation:landscape){
+  #info{max-height:calc(100vh - 22px)}
+  #tour{max-height:calc(100vh - 80px)}
 }
 </style></head><body>
-<div id="app"></div>
-<div id="side" class="p"></div>
-
-<!-- Mobile floating buttons -->
-<div id="mobile-tools">
-  <button class="b" id="mParts">Parts</button>
+<div id="app" aria-busy="true"></div>
+<div id="loader" role="status" aria-live="polite">
+  <div class="loader-inner">
+    <div class="loader-mark" aria-hidden="true"></div>
+    <p class="loader-brand">MECHANICA</p>
+    <p class="loader-status" id="loadStatus">Assembling the skeleton movement</p>
+    <div class="loader-track" aria-hidden="true"></div>
+  </div>
 </div>
+<div id="hint">Drag to rotate · Scroll or pinch to zoom · Select a part to learn more</div>
+<div id="labels" aria-label="Watch part labels"></div>
+<aside id="side" class="p" aria-label="Watch parts guide"></aside>
 
 <div id="backdrop"></div>
 
-<div id="info" class="p">
+<section id="info" class="p" role="region" aria-live="polite" aria-label="Selected watch part" aria-hidden="true">
   <div class="handle"></div>
-  <button class="b x-btn" id="x">✕</button>
-  <div class="tag" id="itag"></div><h2 id="iname"></h2><p id="itext"></p><div class="sp" id="ispec"></div>
-  <div class="nav"><button class="b" id="prev">‹ Prev</button><button class="b" id="next">Next ›</button></div>
-</div>
+  <button class="b x-btn" id="x" type="button" aria-label="Close part guide">✕</button>
+  <div class="tag" id="itag"></div><h2 id="iname"></h2>
+  <div class="depth-control" role="group" aria-label="Explanation detail"><button class="depth-btn" type="button" data-depth="simple">Simple</button><button class="depth-btn" type="button" data-depth="detailed">Detailed</button></div>
+  <div class="detail-label">How it works</div><p id="itext"></p>
+  <div class="detail-label">Key fact</div><div class="sp" id="ispec"></div>
+  <button class="glossary-link info-glossary" id="infoGlossary" type="button">Need a term defined? Open glossary</button>
+  <div class="nav"><button class="b" id="prev" type="button">‹ Previous</button><button class="b" id="next" type="button">Next ›</button></div>
+</section>
 
-<div id="bar" class="p">
-  <button class="b" data-v="front">Front</button><button class="b" data-v="back">Back</button><button class="b" data-v="q">3/4</button><button class="b" data-v="side">Side</button><span class="sep"></span>
-  <button class="b" id="bEx">Explode</button><button class="b" id="bCase">Hide case</button><button class="b" id="bSpin">Auto-rotate</button><button class="b" id="bPause">Pause</button><button class="b" id="bLapse">Time ×1</button><span class="sep"></span><button class="b" id="bTour">▶ Tour</button>
-</div>
-<div id="tour" class="p"><div class="tag" id="tstep"></div><h2 id="tname"></h2><p id="ttext"></p><div class="nav"><button class="b" id="tprev">‹ Back</button><button class="b" id="tnext">Next ›</button><button class="b" id="tx">Exit</button></div></div>
+<nav id="bar" class="p" aria-label="Watch controls">
+  <button class="b mobile-only" id="mParts" type="button" aria-controls="side" aria-expanded="false">Parts</button><span class="sep mobile-only"></span>
+  <button class="b" data-v="front" type="button" aria-label="Front view">Front</button><button class="b" data-v="back" type="button" aria-label="Back view">Back</button><button class="b" data-v="q" type="button" aria-label="Three-quarter view">3/4</button><button class="b" data-v="side" type="button" aria-label="Side view">Side</button><span class="sep"></span>
+  <button class="b" id="bEx" type="button" aria-pressed="false">Explode</button><button class="b" id="bCase" type="button" aria-pressed="false">Hide case</button><button class="b" id="bSpin" type="button" aria-pressed="false">Auto-rotate</button><button class="b" id="bPause" type="button" aria-pressed="false">Pause</button><button class="b" id="bLapse" type="button" title="At ×1, the watch follows your device clock">Time ×1</button><button class="b" id="bTick" type="button" aria-pressed="false" title="Turn the automatic-watch tick sound on or off">Tick On</button><button class="b" id="bLabels" type="button" aria-pressed="false">Labels</button><span class="sep"></span><button class="b" id="bTour" type="button" aria-pressed="false">▶ Tour</button>
+</nav>
+<button class="bar-scroll" id="barPrev" type="button" aria-label="Scroll controls left">‹</button>
+<button class="bar-scroll" id="barNext" type="button" aria-label="Scroll controls right">›</button>
+<section id="tour" class="p" role="region" aria-live="polite" aria-label="Energy-flow tour">
+  <div class="tour-head">
+    <div class="tour-title"><div class="tag" id="tstep"></div><h2 id="tname"></h2></div>
+    <button class="b min-btn" id="tmin" type="button" aria-label="Minimise tour" aria-expanded="true" title="Minimise tour">−</button>
+  </div>
+  <div class="tour-body" id="tourBody">
+    <div class="tour-progress" aria-hidden="true"><span id="tprog"></span></div>
+    <div class="depth-control" role="group" aria-label="Explanation detail"><button class="depth-btn" type="button" data-depth="simple">Simple</button><button class="depth-btn" type="button" data-depth="detailed">Detailed</button></div>
+    <p id="ttext"></p>
+    <div class="nav"><button class="b" id="tprev" type="button">‹ Back</button><button class="b" id="tnext" type="button">Next ›</button><button class="b" id="tx" type="button">Exit</button></div>
+  </div>
+</section>
+<section id="glossary" class="p" role="dialog" aria-modal="true" aria-labelledby="glossaryTitle" aria-hidden="true">
+  <button class="b x-btn" id="gx" type="button" aria-label="Close glossary">✕</button>
+  <div class="tag">Plain-language guide</div><h2 id="glossaryTitle">Watchmaking glossary</h2>
+  <p class="g-intro">Short definitions for the terms used in the part guide and energy-flow tour.</p>
+  <dl class="terms">
+    <div class="term"><dt>Going train</dt><dd>The connected wheels and pinions that carry power from the mainspring barrel to the escapement.</dd></div>
+    <div class="term"><dt>Mainspring</dt><dd>A coiled metal ribbon that stores energy when wound and slowly releases it to drive the watch.</dd></div>
+    <div class="term"><dt>Torque</dt><dd>Turning force. The gear train trades higher torque for higher speed as energy moves toward the escapement.</dd></div>
+    <div class="term"><dt>Escapement</dt><dd>The escape wheel and pallet fork. Together they release the train one small step at a time instead of letting it run down freely.</dd></div>
+    <div class="term"><dt>Beat</dt><dd>One half-swing of the balance wheel. A 2.5 Hz movement beats five times per second.</dd></div>
+    <div class="term"><dt>Impulse</dt><dd>A brief push of energy from the escapement that keeps the balance wheel swinging.</dd></div>
+    <div class="term"><dt>Rotor</dt><dd>The weighted half-disc that swings when you move your wrist and winds an automatic watch.</dd></div>
+    <div class="term"><dt>Reversing wheels</dt><dd>Two-way coupling wheels that turn rotor motion in either direction into one winding direction.</dd></div>
+    <div class="term"><dt>Hairspring</dt><dd>The fine spiral spring that returns the balance wheel toward its centre and helps set the watch’s rate.</dd></div>
+    <div class="term"><dt>Jewel</dt><dd>A tiny synthetic ruby bearing that gives a wheel axle a hard, low-friction surface to turn in.</dd></div>
+  </dl>
+</section>
 <div id="tip"></div>
 <div id="err"></div>
+<audio id="tickAudio" src="tick-loop.mp3" preload="auto" loop playsinline aria-hidden="true"></audio>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script>
 window.addEventListener('error',e=>{const el=document.getElementById('err');if(!el)return;
- el.style.display='block';el.textContent='Error: '+e.message+'\n'+(e.filename||'')+':'+(e.lineno||'');});
+ el.style.display='block';el.textContent='Error: '+e.message+'\n'+(e.filename||'')+':'+(e.lineno||'');
+ const status=document.getElementById('loadStatus');if(status)status.textContent='The 3D scene could not finish loading';});
 window.addEventListener('unhandledrejection',e=>{const el=document.getElementById('err');if(!el)return;
- el.style.display='block';el.textContent='Promise rejection: '+(e.reason&&e.reason.message||e.reason);});
+ el.style.display='block';el.textContent='Promise rejection: '+(e.reason&&e.reason.message||e.reason);
+ const status=document.getElementById('loadStatus');if(status)status.textContent='The 3D scene could not finish loading';});
+setTimeout(()=>{const loader=document.getElementById('loader'),status=document.getElementById('loadStatus');
+ if(loader&&!loader.classList.contains('hide')&&status)status.textContent='Preparing the movement · this can take a moment';},3500);
 </script>
 <script type="module">
 import * as THREE from 'three';
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 const $=id=>document.getElementById(id),PI=Math.PI,V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
-const IS_MOBILE=matchMedia('(max-width:820px),(max-width:900px) and (max-height:500px)').matches;
-const IS_PHONE=matchMedia('(max-width:480px),(max-width:900px) and (max-height:500px)').matches;
-if(IS_PHONE){
-  const shortLabels={bCase:'Case',bSpin:'Spin',bLapse:'×1'};
-  for(const [id,label] of Object.entries(shortLabels)){
-    const b=$(id);b.setAttribute('aria-label',b.textContent);b.textContent=label;
-  }
-}
+const mobileQuery=matchMedia('(max-width:820px)');
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let IS_MOBILE=mobileQuery.matches;
+const deviceMemory=navigator.deviceMemory||8;
+const LOW_POWER=IS_MOBILE&&(deviceMemory<=4||(navigator.hardwareConcurrency||8)<=4);
 
 /* ---------- renderer / scene ---------- */
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,IS_MOBILE?1.75:2));renderer.setSize(innerWidth,innerHeight);
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.outputColorSpace=THREE.SRGBColorSpace;
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,LOW_POWER?1.2:IS_MOBILE?1.5:2));renderer.setSize(innerWidth,innerHeight);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=LOW_POWER?.92:1.0;renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 $('app').appendChild(renderer.domElement);
-const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,innerWidth/innerHeight,.1,100);
-camera.position.set(4.2,-2.6,8.6);
-const controls=new OrbitControls(camera,renderer.domElement);
-Object.assign(controls,{enableDamping:true,dampingFactor:.07,minDistance:2,maxDistance:26,autoRotateSpeed:4.2});
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(IS_MOBILE?42:32,innerWidth/innerHeight,.1,100);
+camera.position.set(4.2,-2.6,8.6).setLength(IS_MOBILE?14.6:11.2);
+let controls=null;
+import('three/addons/controls/OrbitControls.js').then(({OrbitControls})=>{
+ controls=new OrbitControls(camera,renderer.domElement);
+ Object.assign(controls,{enableDamping:true,dampingFactor:.07,minDistance:2,maxDistance:26,autoRotateSpeed:3.6,enablePan:false,rotateSpeed:.85,zoomSpeed:.9,minPolarAngle:.06,maxPolarAngle:PI-.06});
+ controls.autoRotate=$('bSpin').classList.contains('on');
+ controls.addEventListener('start',()=>fly=null)
+}).catch(e=>console.warn('Orbit controls unavailable',e));
 /* Studio environment: dark room with softbox strips -> crisp, sweeping reflections on metal */
 try{
   const pm=new THREE.PMREMGenerator(renderer),es=new THREE.Scene();
@@ -194,29 +356,35 @@ try{
   sb(12,8,[0,3,-16],0xffeedd,4);     // rear softbox
   sb(3,13,[-10,-5,-12],0xcde0ff,6);sb(3,13,[10,8,-11],0xfff0dd,6);
   scene.environment=pm.fromScene(es,.035).texture;
-  const bc=document.createElement('canvas');bc.width=bc.height=512;const bg=bc.getContext('2d'),gr=bg.createRadialGradient(256,190,20,256,256,370);
-  gr.addColorStop(0,'#2b3541');gr.addColorStop(.55,'#10151c');gr.addColorStop(1,'#040506');bg.fillStyle=gr;bg.fillRect(0,0,512,512);
+  const bc=document.createElement('canvas');bc.width=bc.height=512;const bg=bc.getContext('2d'),gr=bg.createRadialGradient(256,215,16,256,215,380);
+  gr.addColorStop(0,'#2b4059');gr.addColorStop(.38,'#17283d');gr.addColorStop(.72,'#0b1420');gr.addColorStop(1,'#05080d');bg.fillStyle=gr;bg.fillRect(0,0,512,512);
   const bt=new THREE.CanvasTexture(bc);bt.colorSpace=THREE.SRGBColorSpace;scene.background=bt;
 }catch(e){console.warn('Studio environment failed',e)}
-/* Bloom (glow) post-processing; falls back to plain rendering if unavailable */
-let composer=null,film=null;
-try{
-  const [{EffectComposer},{RenderPass},{UnrealBloomPass},{OutputPass},{ShaderPass}]=await Promise.all([
+/* Post-processing is intentionally deferred until after the first plain frame. */
+let composer=null,film=null,bloomPass=null,postPromise=null;
+async function setupPostProcessing(){
+ if(postPromise||LOW_POWER)return postPromise;
+ postPromise=(async()=>{
+  try{
+   const [{EffectComposer},{RenderPass},{UnrealBloomPass},{OutputPass},{ShaderPass}]=await Promise.all([
     import('three/addons/postprocessing/EffectComposer.js'),import('three/addons/postprocessing/RenderPass.js'),
     import('three/addons/postprocessing/UnrealBloomPass.js'),import('three/addons/postprocessing/OutputPass.js'),import('three/addons/postprocessing/ShaderPass.js')]);
-  const pr=renderer.getPixelRatio();
-  const rt=new THREE.WebGLRenderTarget(innerWidth*pr,innerHeight*pr,{type:THREE.HalfFloatType,samples:IS_MOBILE?2:4});
-  composer=new EffectComposer(renderer,rt);composer.setPixelRatio(pr);composer.setSize(innerWidth,innerHeight);
-  composer.addPass(new RenderPass(scene,camera));
-  composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),IS_MOBILE?.2:.28,.5,.34));
-  composer.addPass(new OutputPass());
-  const FilmShader={uniforms:{tDiffuse:{value:null},time:{value:0},vig:{value:.36},grain:{value:.04}},
-   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-   fragmentShader:'uniform sampler2D tDiffuse;uniform float time,vig,grain;varying vec2 vUv;float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length((vUv-.5)*vec2(1.,.9))*1.35;c.rgb*=1.-vig*smoothstep(.3,1.,d);float n=h(gl_FragCoord.xy+fract(time)*vec2(97.,53.))-.5;c.rgb+=n*grain;gl_FragColor=vec4(c.rgb,1.);}'};
-  film=new ShaderPass(FilmShader);composer.addPass(film);
-}catch(e){console.warn('Bloom unavailable, using plain rendering',e);composer=null;film=null}
+   const pr=renderer.getPixelRatio();
+   const rt=new THREE.WebGLRenderTarget(innerWidth*pr,innerHeight*pr,{type:THREE.HalfFloatType,samples:IS_MOBILE?2:4});
+   composer=new EffectComposer(renderer,rt);composer.setPixelRatio(pr);composer.setSize(innerWidth,innerHeight);
+   composer.addPass(new RenderPass(scene,camera));
+   bloomPass=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),IS_MOBILE?.12:.25,.4,IS_MOBILE?.43:.38);
+   composer.addPass(bloomPass);composer.addPass(new OutputPass());
+   const FilmShader={uniforms:{tDiffuse:{value:null},time:{value:0},vig:{value:.32},grain:{value:reduceMotion?.012:IS_MOBILE?.02:.035}},
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:'uniform sampler2D tDiffuse;uniform float time,vig,grain;varying vec2 vUv;float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}void main(){vec4 c=texture2D(tDiffuse,vUv);float d=length((vUv-.5)*vec2(1.,.9))*1.35;c.rgb*=1.-vig*smoothstep(.3,1.,d);float n=h(gl_FragCoord.xy+fract(time)*vec2(97.,53.))-.5;c.rgb+=n*grain;gl_FragColor=vec4(c.rgb,1.);}'};
+   film=new ShaderPass(FilmShader);composer.addPass(film)
+  }catch(e){console.warn('Bloom unavailable, keeping direct rendering',e);composer=null;film=null;bloomPass=null}
+ })();
+ return postPromise
+}
 const key=new THREE.DirectionalLight(0xfff1dc,.51);key.position.set(4,5,9);key.castShadow=true;
-key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.0004;key.shadow.normalBias=.02;
+key.shadow.mapSize.set(LOW_POWER?768:IS_MOBILE?1024:2048,LOW_POWER?768:IS_MOBILE?1024:2048);key.shadow.bias=-.0004;key.shadow.normalBias=.02;
 Object.assign(key.shadow.camera,{left:-6,right:6,top:6,bottom:-6,near:1,far:30});
 const rimL=new THREE.DirectionalLight(0xa9c7ff,.27);rimL.position.set(-5,-3,-9);
 const fillL=new THREE.DirectionalLight(0xffffff,.15);fillL.position.set(-5,4,5);
@@ -258,8 +426,9 @@ const steel=M(0xe4e9ef,1,.08),brushed=M(0xbfc7d1,1,.3),gun=M(0x3b4048,1,.3,{clea
 const glowG=M(0xd6a94f,1,.16,{emissive:0xd9a441,emissiveIntensity:.55}),glowS=M(0xc9963a,1,.25,{emissive:0xd9a441,emissiveIntensity:.5}),glowB=M(0x1e4a8a,1,.12,{emissive:0x3a72d8,emissiveIntensity:.45});
 /* ---------- registry ---------- */
 const watch=new THREE.Group();scene.add(watch);const parts={};
+const SHADOW_PARTS=new Set(['caseMid','bezel','caseBack','lugs','crown','mainplate','bridge','barrel','balance','rotor']);
 function reg(k,o,p,ex=V()){o.position.copy(p);o.userData.ex=ex;o.userData.p0=p.clone();
- o.traverse(m=>{if(m.isMesh){m.userData.key=k;m.castShadow=m.receiveShadow=true}});watch.add(o);(parts[k]||=[]).push(o);return o}
+ o.traverse(m=>{if(m.isMesh){m.userData.key=k;m.castShadow=SHADOW_PARTS.has(k);m.receiveShadow=true}});watch.add(o);(parts[k]||=[]).push(o);return o}
 const cyl=(r,h,m,s=32)=>{const x=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,s),m);x.rotation.x=PI/2;return x};
 const ext=(s,d,m,b=.01)=>new THREE.Mesh(new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:true,bevelSize:b,bevelThickness:b,bevelSegments:2,curveSegments:16}),m);
 const lathe=(pts,m)=>{const g=new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),128);g.rotateX(PI/2);const x=new THREE.Mesh(g,m);m.side=THREE.DoubleSide;return x};
@@ -277,9 +446,22 @@ function arm(p,q,w,mat,th=.07){const d=q.clone().sub(p),L=d.length(),r=w/2,s=new
 function spiral(r0,r1,turns,tube,mat,n=240){const pts=[];for(let i=0;i<=n;i++){const t=i/n,a=t*turns*2*PI,r=r0+(r1-r0)*t;pts.push(V(Math.cos(a)*r,Math.sin(a)*r,0))}
  return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),n*2,tube,6,false),mat)}
 const at=(m,x,y,z)=>(m.position.set(x,y,z),m);
-const jewelG=new THREE.Group(),screwG=new THREE.Group();
-function jewel(x,y,z){const j=cyl(.05,.03,ruby,20);j.position.set(x,y,z);const r=new THREE.Mesh(new THREE.TorusGeometry(.058,.011,8,24),gold);r.position.set(x,y,z);jewelG.add(j,r)}
-function screw(x,y,z){const s=cyl(.045,.025,blue,20);s.position.set(x,y,z);const k=new THREE.Mesh(new THREE.BoxGeometry(.07,.008,.008),gun);k.position.set(x,y,z+.014);k.rotation.z=x*9;screwG.add(s,k)}
+function instances(geometry,material,count,place){
+ const mesh=new THREE.InstancedMesh(geometry,material,count),dummy=new THREE.Object3D();
+ for(let i=0;i<count;i++){dummy.position.set(0,0,0);dummy.rotation.set(0,0,0);dummy.scale.set(1,1,1);place(dummy,i);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)}
+ mesh.instanceMatrix.needsUpdate=true;return mesh
+}
+const jewelG=new THREE.Group(),screwG=new THREE.Group(),jewelData=[],screwData=[];
+function jewel(x,y,z){jewelData.push([x,y,z])}
+function screw(x,y,z){screwData.push([x,y,z])}
+function buildSmallInstances(){
+ const jc=new THREE.CylinderGeometry(.05,.05,.03,20);jc.rotateX(PI/2);
+ jewelG.add(instances(jc,ruby,jewelData.length,(o,i)=>o.position.set(...jewelData[i])));
+ jewelG.add(instances(new THREE.TorusGeometry(.058,.011,8,24),gold,jewelData.length,(o,i)=>o.position.set(...jewelData[i])));
+ const sc=new THREE.CylinderGeometry(.045,.045,.025,20);sc.rotateX(PI/2);
+ screwG.add(instances(sc,blue,screwData.length,(o,i)=>o.position.set(...screwData[i])));
+ screwG.add(instances(new THREE.BoxGeometry(.07,.008,.008),gun,screwData.length,(o,i)=>{o.position.set(...screwData[i]);o.position.z+=.014;o.rotation.z=screwData[i][0]*9}))
+}
 
 /* ---------- layout ---------- */
 const P={barrel:V(-.72,.5),center:V(0,0),third:V(.55,.45),fourth:V(.8,-.1),esc:V(.62,-.5),pal:V(.2,-.8),bal:V(-.45,-.95)};
@@ -304,7 +486,8 @@ pal.add(cyl(.05,.05,steel,16));reg('palletFork',pal,V(P.pal.x,P.pal.y,.23),V(0,0
 
 const bal=new THREE.Group();bal.add(new THREE.Mesh(new THREE.TorusGeometry(.5,.032,16,96),steel),cyl(.06,.06,steel,24));
 for(let i=0;i<3;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(1,.03,.025),steel);s.rotation.z=i*PI/3+.3;bal.add(s)}
-for(let i=0;i<8;i++){const a=i*PI/4,s=cyl(.032,.05,gold,12);s.position.set(Math.cos(a)*.5,Math.sin(a)*.5,0);bal.add(s)}
+const weightGeo=new THREE.CylinderGeometry(.032,.032,.05,12);weightGeo.rotateX(PI/2);
+bal.add(instances(weightGeo,gold,8,(o,i)=>{const a=i*PI/4;o.position.set(Math.cos(a)*.5,Math.sin(a)*.5,0)}));
 const roller=cyl(.13,.025,steel,32);roller.position.z=-.03;bal.add(roller);
 const hair=spiral(.07,.34,5.5,.007,blue,300);hair.position.z=.035;bal.add(hair);
 reg('balance',bal,V(P.bal.x,P.bal.y,.25),V(0,0,.95));hair.userData.key='hairspring';parts.hairspring=[hair];
@@ -312,14 +495,18 @@ reg('balance',bal,V(P.bal.x,P.bal.y,.25),V(0,0,.95));hair.userData.key='hairspri
 const br=new THREE.Group(),A=(a,b,w=.2)=>{const g=arm(a,b,w,cdg(brushed));br.add(g);jewel(a.x,a.y,ZF+.1);screw(b.x,b.y,ZF+.095)};
 A(P.barrel,P.center);A(P.center,P.third);A(P.third,P.fourth);A(P.fourth,P.esc,.18);A(P.esc,P.pal,.18);A(P.bal,V(-1.28,-.35),.22);
 jewel(P.bal.x,P.bal.y,ZF+.1);screw(-1.2,.2,ZF+.095);screw(.3,.9,ZF+.095);
+buildSmallInstances();
 reg('bridge',br,V(0,0,ZF),V(0,0,1.2));reg('jewels',jewelG,V(),V(0,0,1.45));reg('screws',screwG,V(),V(0,0,1.45));
 
 const dial=new THREE.Mesh(new THREE.RingGeometry(1.55,2,128),M(0xffffff,.35,.42,{map:dialTex,clearcoat:.6,side:THREE.DoubleSide}));
 const dg=new THREE.Group();dg.add(dial);const dr=new THREE.Mesh(new THREE.TorusGeometry(1.555,.02,10,128),gold);dg.add(dr);
 reg('dial',dg,V(0,0,.42),V(0,0,1.8));
-const idx=new THREE.Group();
-for(let i=0;i<12;i++){const a=i*PI/6,ofs=i==0?[-.045,.045]:[0];ofs.forEach(o=>{const m=new THREE.Mesh(new THREE.BoxGeometry(i==0?.04:.075,.2,.035),glowG);
- m.position.set(Math.sin(a)*1.78+Math.cos(a)*o,Math.cos(a)*1.78-Math.sin(a)*o,0);m.rotation.z=-a;idx.add(m)})}
+const idx=new THREE.Group(),idxData=[];
+for(let i=0;i<12;i++){const a=i*PI/6,ofs=i==0?[-.045,.045]:[0];ofs.forEach(o=>idxData.push([a,o,i==0,i==0?.04:.075]))}
+idx.add(instances(new THREE.BoxGeometry(1,1,1),glowG,idxData.length,(o,i)=>{
+ const [a,offset,double,width]=idxData[i];o.position.set(Math.sin(a)*1.78+Math.cos(a)*offset,Math.cos(a)*1.78-Math.sin(a)*offset,0);
+ o.rotation.z=-a;o.scale.set(width,.2,.035)
+}));
 reg('indices',idx,V(0,0,.46),V(0,0,2));
 
 function hand(L,w,tail){const g=new THREE.Group();[-1,1].forEach((sd,i)=>{const s=new THREE.Shape();s.moveTo(0,-tail);s.lineTo(sd*w,0);s.lineTo(0,L);s.closePath();g.add(ext(s,.03,i?glowS:glowG,.006))});g.add(cyl(.07,.07,gold,24));return g}
@@ -351,23 +538,81 @@ reg('bezel',lathe([[2,.5],[2.48,.5],[2.52,.55],[2.5,.66],[2.2,.72],[2.04,.68],[2
 const R=10,th=Math.asin(2.05/R),dome=new THREE.SphereGeometry(R,64,16,0,2*PI,0,th);dome.rotateX(PI/2);
 const crys=new THREE.Mesh(dome,glass);reg('crystal',crys,V(0,0,.7-R*Math.cos(th)),V(0,0,4.2));crys.castShadow=false;
 const cb=lathe([[2,-.55],[2.42,-.55],[2.32,-.8],[2.02,-.82],[2,-.7]],gun);const cbg=new THREE.Group();cbg.add(cb);
-for(let i=0;i<8;i++){const a=i*PI/4,s=cyl(.055,.03,steel,16);s.position.set(Math.cos(a)*2.2,Math.sin(a)*2.2,-.82);cbg.add(s)}
+const caseScrewGeo=new THREE.CylinderGeometry(.055,.055,.03,16);caseScrewGeo.rotateX(PI/2);
+cbg.add(instances(caseScrewGeo,steel,8,(o,i)=>{const a=i*PI/4;o.position.set(Math.cos(a)*2.2,Math.sin(a)*2.2,-.82)}));
 reg('caseBack',cbg,V(),V(0,0,-2.7));
 const bgl=cyl(2.03,.04,glass,96);reg('backGlass',bgl,V(0,0,-.72),V(0,0,-3.4));bgl.castShadow=false;
 const crown=new THREE.Group();const cr=cyl(.3,.4,steel,32);cr.rotation.set(0,0,PI/2);crown.add(cr);
-for(let i=0;i<20;i++){const a=i*PI/10,k=new THREE.Mesh(new THREE.BoxGeometry(.4,.06,.06),gun);k.position.set(0,Math.cos(a)*.3,Math.sin(a)*.3);k.rotation.x=a;crown.add(k)}
+crown.add(instances(new THREE.BoxGeometry(.4,.06,.06),gun,20,(o,i)=>{const a=i*PI/10;o.position.set(0,Math.cos(a)*.3,Math.sin(a)*.3);o.rotation.x=a}));
 reg('crown',crown,V(2.66,0,.0),V(1.3,0,0));
 const lug=new THREE.Group();const rr=(w,h,r)=>{const s=new THREE.Shape();s.moveTo(-w/2+r,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(-w/2+r,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,-h/2+r);s.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);return s};
-[[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sy])=>{const l=ext(rr(.5,1,.15),.4,gun,.04);l.position.set(sx*1.45,sy*2.6,-.25);l.rotation.x=-sy*.12;lug.add(l)});
-[1,-1].forEach(sy=>{const sb=cyl(.04,2.4,steel,12);sb.rotation.set(0,PI/2,0);sb.position.set(0,sy*2.95,-.05);lug.add(sb);
- const st=new THREE.Mesh(new THREE.BoxGeometry(2.4,2.2,.2),leather);st.position.set(0,sy*4,-.4);st.rotation.x=sy*.26;lug.add(st)});
+const lugPairs=[[-1,1],[1,1],[-1,-1],[1,-1]],lugGeo=ext(rr(.5,1,.15),.4,gun,.04).geometry;
+lug.add(instances(lugGeo,gun,4,(o,i)=>{const [sx,sy]=lugPairs[i];o.position.set(sx*1.45,sy*2.6,-.25);o.rotation.x=-sy*.12}));
+const barGeo=new THREE.CylinderGeometry(.04,.04,2.4,12);barGeo.rotateZ(PI/2);
+lug.add(instances(barGeo,steel,2,(o,i)=>{const sy=i? -1:1;o.position.set(0,sy*2.95,-.05)}));
+lug.add(instances(new THREE.BoxGeometry(2.4,2.2,.2),leather,2,(o,i)=>{const sy=i? -1:1;o.position.set(0,sy*4,-.4);o.rotation.x=sy*.26}));
 reg('lugs',lug,V());
+
+/* ---------- deferred geometry batching ---------- */
+let batchingPromise=null;
+function materialBatchKey(m){
+ if(!m||Array.isArray(m))return null;
+ return [m.type,m.color?.getHex(),m.metalness,m.roughness,m.map?.uuid,m.emissive?.getHex(),m.emissiveIntensity,m.transparent,m.opacity,m.alphaTest,m.side,m.clearcoat,m.envMapIntensity,m.depthWrite].join('|')
+}
+function normaliseBatchGeometry(mesh,inverseRoot){
+ let g=mesh.geometry.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverseRoot,mesh.matrixWorld));
+ if(g.index)g=g.toNonIndexed();
+ if(!g.getAttribute('normal'))g.computeVertexNormals();
+ if(!g.getAttribute('uv'))g.setAttribute('uv',new THREE.Float32BufferAttribute(new Float32Array(g.getAttribute('position').count*2),2));
+ for(const name of Object.keys(g.attributes))if(!['position','normal','uv'].includes(name))g.deleteAttribute(name);
+ g.clearGroups();return g
+}
+async function optimiseGeometry(){
+ if(batchingPromise)return batchingPromise;
+ batchingPromise=(async()=>{
+  try{
+   const {mergeGeometries}=await import('three/addons/utils/BufferGeometryUtils.js');
+   const processed=new Set();
+   for(const key of Object.keys(parts)){
+    for(const root of parts[key]){
+     if(processed.has(root)||!root.isGroup)continue;
+     processed.add(root);root.updateWorldMatrix(true,true);
+     const inverseRoot=root.matrixWorld.clone().invert(),sources=[];
+     root.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&!Array.isArray(o.material)&&o.userData.key===key)sources.push(o)});
+     if(sources.length<2)continue;
+     const groups=new Map();
+     for(const mesh of sources){
+      const signature=materialBatchKey(mesh.material);if(!signature)continue;
+      if(!groups.has(signature))groups.set(signature,[]);groups.get(signature).push(mesh)
+     }
+     for(const [signature,batch] of groups){
+      if(batch.length<2)continue;
+      const geometries=batch.map(mesh=>normaliseBatchGeometry(mesh,inverseRoot));
+      const merged=mergeGeometries(geometries,false);
+      if(!merged)continue;
+      const mesh=new THREE.Mesh(merged,batch[0].material);
+      mesh.userData.key=key;mesh.castShadow=batch.some(m=>m.castShadow);mesh.receiveShadow=batch.some(m=>m.receiveShadow);
+      batch.forEach(m=>m.parent?.remove(m));root.add(mesh)
+     }
+    }
+   }
+   hov.length=0;watch.traverse(m=>{if(m.isMesh&&!['crystal','backGlass'].includes(m.userData.key))hov.push(m)});
+   window.__watchRenderStats=watchMeshes()
+  }catch(e){console.warn('Geometry batching skipped',e)}
+ })();
+ return batchingPromise
+}
+function watchMeshes(){
+ let meshes=0,instances=0,draws=0;
+ watch.traverse(o=>{if(o.isMesh){meshes++;if(o.isInstancedMesh)instances++;draws+=Array.isArray(o.material)?o.material.length:1}});
+ return {meshes,instances,estimatedDraws:draws}
+}
 
 /* ---------- part info ---------- */
 const I={
 hour:['Hour hand','front','Faceted dauphine hand in gold. It rides on the cannon pinion and is driven through the motion works at one-twelfth the speed of the minute hand.','1 rev / 12 h'],
 minute:['Minute hand','front','Matching dauphine hand, mounted on the centre wheel’s cannon pinion. Its long tip reaches the minute track on the chapter ring.','1 rev / 60 min'],
-second:['Seconds hand','front','Blued-steel hand on the fourth-wheel arbor, with a round counterweight. It advances in eight tiny steps each second, one per beat.','1 rev / 60 s'],
+second:['Seconds hand','front','Blued-steel hand on the fourth-wheel arbor, with a round counterweight. It advances in five tiny steps each second, one per beat.','1 rev / 60 s'],
 indices:['Applied indices','front','Twelve hand-applied gold batons, with a double baton at 12 o’clock as on the reference watch.','Gold plated'],
 dial:['Dial & chapter ring','front','Sunburst-blue ring carrying the minute track and logo. The open centre shows the barrel, going train and escapement.','Ø 40 mm aperture ring'],
 crystal:['Sapphire crystal','case','Domed, scratch-resistant sapphire with anti-reflective coating. Select it from the list because it is click-through in the scene.','Mohs 9'],
@@ -385,7 +630,7 @@ thirdWheel:['Third wheel','front','Intermediate wheel stepping the speed up from
 fourthWheel:['Fourth wheel','front','Turns once per minute and carries the seconds hand.','32 teeth · 1 rev / min'],
 escapeWheel:['Escape wheel','front','Receives energy from the train and releases it one tooth at a time through the pallet fork. This is the “tick”.','15 teeth'],
 palletFork:['Pallet fork','front','Rocks with the balance, locking and releasing the escape wheel while giving the balance a small impulse each swing. Rubies form the pallet stones.','Ruby pallets'],
-balance:['Balance wheel','front','The oscillator. It swings back and forth, and with the hairspring sets the watch’s rate.','4 Hz · 28,800 vph'],
+balance:['Balance wheel','front','The oscillator. It swings back and forth, and with the hairspring sets the watch’s rate.','2.5 Hz · 18,000 vph'],
 hairspring:['Hairspring','front','Fine blued spiral that pulls the balance back to centre; its stiffness and the balance inertia define the beat rate.','Blued steel'],
 bridge:['Front bridges','front','Brushed bridges hold the train pivots in place above the main plate, secured with blued screws.','Côtes de Genève'],
 jewels:['Ruby jewels','front','Synthetic ruby bearings in gold chatons reduce friction at the pivots and last longer than metal.','21 jewels'],
@@ -398,18 +643,42 @@ reverser:['Reversing wheels','rear','Two wheels that convert rotor movement in e
 rearBridge:['Rear bridge','rear','Holds the automatic winding train in place behind the plate, finished with Côtes de Genève stripes.','Côtes de Genève'],
 bearing:['Rotor bearing','rear','Ball bearing at the centre that lets the rotor spin freely with minimal friction.','Ceramic balls'],
 rotor:['Oscillating weight (rotor)','rear','Half-disc of heavy metal. Arm and wrist movement spin it, and the reversing wheels use that motion to wind the mainspring. This makes the watch “automatic”.','Skeleton, 22k tungsten']};
+const S={
+hour:'The slower hand that shows the hour.',minute:'The long hand that shows the minutes.',second:'The thin hand that shows the seconds, moving in five tiny steps each second.',
+indices:'The gold markers around the dial that make the hours easy to read.',dial:'The blue ring around the movement. It carries the minute markings and the brand name.',
+crystal:'The clear protective cover over the dial. It is made from scratch-resistant sapphire.',bezel:'The polished metal ring that holds the crystal against the case.',
+caseMid:'The main body of the watch. It protects the movement and connects the crown and strap.',lugs:'The four metal arms that connect the watch case to the strap.',
+crown:'The side knob used to wind the watch or pull out when setting the time.',caseBack:'The back cover that holds the display window in place.',
+backGlass:'The clear sapphire window that lets you watch the automatic winding mechanism.',mainplate:'The base plate that supports the wheels, bridges and jewel bearings.',
+barrel:'The round housing that contains the coiled mainspring.',mainspring:'The coiled spring that stores the watch’s power.',centerWheel:'The central gear that turns once an hour and carries the minute hand.',
+thirdWheel:'A middle gear that passes energy from the centre wheel toward the escapement.',fourthWheel:'The gear that turns once a minute and carries the seconds hand.',
+escapeWheel:'The toothed wheel that releases the movement’s power one small step at a time.',palletFork:'The small lever that locks and releases the escape wheel, creating the tick.',
+balance:'The wheel that swings back and forth to control the speed of the movement.',hairspring:'The delicate spiral spring that keeps the balance rhythm steady.',
+bridge:'Metal supports that hold the moving parts in place above the main plate.',jewels:'Tiny ruby bearings that reduce friction where the gears pivot.',
+screws:'Blue steel screws that secure the bridges.',ratchet:'The toothed wheel that is turned when winding the mainspring.',
+click:'The small catch that stops the ratchet from spinning backward.',crownWheel:'A wheel that passes turning motion from the crown into the winding system.',
+reducer:'A gear that slows the rotor’s quick swing to a useful winding speed.',reverser:'Wheels that make the winding mechanism work whichever way the rotor turns.',
+rearBridge:'A support across the back that holds the automatic winding gears.',bearing:'The low-friction centre that lets the rotor spin freely.',
+rotor:'The weighted arm that swings as you move and winds the mainspring automatically.'};
 const G=[['Dial side',['hour','minute','second','indices','dial','crystal']],['Case',['bezel','caseMid','lugs','crown','caseBack','backGlass']],
 ['Movement · front',['mainplate','barrel','mainspring','centerWheel','thirdWheel','fourthWheel','escapeWheel','palletFork','balance','hairspring','bridge','jewels','screws']],
 ['Movement · rear',['ratchet','click','crownWheel','reducer','reverser','rearBridge','bearing','rotor']]];
 const L=G.flatMap(g=>g[1]);
-$('side').innerHTML=G.map(([h,ks])=>`<div class="grp">${h}</div>`+ks.map(k=>`<button class="it" data-k="${k}">${I[k][0]}</button>`).join('')).join('');
+$('side').innerHTML=`<div class="side-head"><div class="side-head-copy"><h1 class="side-title">Parts guide</h1><p class="side-help">Choose a part here or tap the watch.</p><button class="glossary-link" id="sideGlossary" type="button">? Glossary</button></div><button class="b side-close" id="sideClose" type="button" aria-label="Close parts guide">✕</button></div>`+
+ G.map(([h,ks])=>`<div class="grp">${h}</div>`+ks.map(k=>`<button class="it" type="button" data-k="${k}">${I[k][0]}</button>`).join('')).join('');
 
 /* ---------- selection ---------- */
-let sel=null;const orig=new Map(),CASE=['caseMid','bezel','crystal','lugs','crown','caseBack','backGlass'];
+let sel=null,depth='simple';const orig=new Map(),CASE=['caseMid','bezel','crystal','lugs','crown','caseBack','backGlass'];
 const meshesOf=k=>{const a=[];(parts[k]||[]).forEach(o=>o.traverse(m=>m.isMesh&&a.push(m)));return a};
 
-function showInfo(){ $('info').classList.add('on'); if(!IS_MOBILE){$('info').style.display='block';} else {$('backdrop').classList.add('on')} }
-function hideInfo(){ $('info').classList.remove('on'); if(!IS_MOBILE){$('info').style.display='none';} $('backdrop').classList.remove('on') }
+function showInfo(){ $('info').classList.add('on');$('info').setAttribute('aria-hidden','false'); if(!IS_MOBILE)$('info').style.display='block' }
+function hideInfo(){ $('info').classList.remove('on');$('info').setAttribute('aria-hidden','true'); if(!IS_MOBILE)$('info').style.display='none' }
+function setDepth(level){
+ depth=level==='detailed'?'detailed':'simple';
+ document.querySelectorAll('.depth-btn').forEach(b=>{const on=b.dataset.depth===depth;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});
+ if(sel)$('itext').textContent=depth==='simple'?S[sel]:I[sel][2];
+ if(tour.on)renderTourText()
+}
 
 function select(k,focus){ if(k&&tour.on)endTour();
  orig.forEach((m,o)=>o.material=m);orig.clear();sel=k;
@@ -418,57 +687,176 @@ function select(k,focus){ if(k&&tour.on)endTour();
  meshesOf(k).forEach(m=>{const mats=Array.isArray(m.material)?m.material:[m.material];orig.set(m,m.material);
   const c=mats.map(x=>{const y=x.clone();y.emissive=new THREE.Color(0xd6a94f);y.emissiveIntensity=.5;return y});m.material=Array.isArray(m.material)?c:c[0]});
  const [n,s,t,sp]=I[k];$('itag').textContent={front:'Dial side · movement front',rear:'Rear · seen through display back',case:'Case'}[s];
- $('iname').textContent=n;$('itext').textContent=t;$('ispec').textContent='Spec: '+sp;
+ $('iname').textContent=n;$('itext').textContent=depth==='simple'?S[k]:t;$('ispec').textContent=sp;
  showInfo();
  if(focus)focusOn(k)}
 const hl=()=>{if(!sel)return;const v=.45+Math.sin(performance.now()/260)*.3;orig.forEach((_,m)=>(Array.isArray(m.material)?m.material:[m.material]).forEach(x=>x.emissiveIntensity=v))};
 document.querySelectorAll('.it').forEach(b=>b.onclick=()=>{select(b.dataset.k,true); if(IS_MOBILE) closePartsDrawer()});
+document.querySelectorAll('.depth-btn').forEach(b=>b.onclick=()=>setDepth(b.dataset.depth));
 $('x').onclick=()=>select(null);
 $('prev').onclick=()=>select(L[(L.indexOf(sel)+L.length-1)%L.length],true);
 $('next').onclick=()=>select(L[(L.indexOf(sel)+1)%L.length],true);
-$('backdrop').onclick=()=>{ if($('info').classList.contains('on')) select(null); else closePartsDrawer(); };
+$('backdrop').onclick=()=>{ if($('glossary').classList.contains('on'))closeGlossary();else if($('info').classList.contains('on')) select(null); else closePartsDrawer(); };
 
 /* ---------- mobile parts drawer ---------- */
 function openPartsDrawer(){ if(!IS_MOBILE) return;
-  $('side').style.display='block'; $('side').style.left='0'; $('side').style.top='0'; $('side').style.bottom='0';
-  $('side').style.width=IS_PHONE?'76%':'82%'; $('side').style.maxWidth=IS_PHONE?'270px':'320px'; $('side').style.borderRadius='0';
-  $('side').style.zIndex='7'; $('backdrop').classList.add('on');
+  $('side').classList.add('on');$('side').setAttribute('aria-hidden','false');
+  $('mParts').setAttribute('aria-expanded','true');$('backdrop').classList.add('on')
 }
 function closePartsDrawer(){ if(!IS_MOBILE) return;
-  $('side').style.display='none'; $('backdrop').classList.remove('on');
+  $('side').classList.remove('on');$('side').setAttribute('aria-hidden','true');
+  $('mParts').setAttribute('aria-expanded','false');$('backdrop').classList.remove('on')
 }
 $('mParts').onclick=()=>openPartsDrawer();
+$('sideClose').onclick=closePartsDrawer;
+
+/* ---------- glossary ---------- */
+function openGlossary(){
+ if(IS_MOBILE)closePartsDrawer();
+ $('glossary').classList.add('on');$('glossary').setAttribute('aria-hidden','false');$('backdrop').classList.add('on');
+ $('gx').focus({preventScroll:true})
+}
+function closeGlossary(){
+ $('glossary').classList.remove('on');$('glossary').setAttribute('aria-hidden','true');
+ if(!$('info').classList.contains('on')&&!$('side').classList.contains('on'))$('backdrop').classList.remove('on')
+}
+$('sideGlossary').onclick=openGlossary;$('infoGlossary').onclick=openGlossary;$('gx').onclick=closeGlossary;
 
 /* ---------- camera moves ---------- */
 let fly=null;
-const flyTo=(p,t)=>{fly={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,s:0}};
-const VIEWS={front:V(0,0,10.5),back:V(0,0,-10.5),q:V(4.2,-2.6,8.6),side:V(10.5,.6,1.2)};
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>flyTo(VIEWS[b.dataset.v].clone(),V()));
+const flyTo=(p,t)=>{
+ if(!controls){camera.position.copy(p);camera.lookAt(t);return}
+ fly={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,s:0}
+};
+const VIEWS={front:V(0,0,12.5),back:V(0,0,-12.5),q:V(4.2,-2.6,8.6).setLength(11.2),side:V(12.5,.7,1.45)};
+const viewFor=k=>VIEWS[k].clone().multiplyScalar(IS_MOBILE?1.25:1);
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>flyTo(viewFor(b.dataset.v),V()));
 function focusOn(k){const b=new THREE.Box3();parts[k].forEach(o=>b.expandByObject(o));const c=b.getCenter(V()),sz=b.getSize(V()).length(),s=I[k][1];
- const dir=s=='rear'?V(.3,-.3,-1):s=='front'?V(.3,-.3,1):camera.position.clone().sub(controls.target);dir.normalize();
- flyTo(c.clone().addScaledVector(dir,Math.max(3.4,sz*2+1.5)),c)}
-controls.addEventListener('start',()=>fly=null);
-
+ const target=controls?.target||V();
+ const dir=s=='rear'?V(.3,-.3,-1):s=='front'?V(.3,-.3,1):camera.position.clone().sub(target);dir.normalize();
+ flyTo(c.clone().addScaledVector(dir,Math.max(3.4,sz*2+1.5)*(IS_MOBILE?1.35:1)),c)}
 /* ---------- toggles ---------- */
 let ex=0,exT=0,paused=false,lapse=1,hs=0;const LAPSES=[1,60,600];
 const tog=(id,f)=>{const b=$(id);b.onclick=()=>{f(b)}};
-tog('bEx',b=>{exT=exT?0:1;b.classList.toggle('on',!!exT);if(exT&&controls.getDistance?.()<14)flyTo(camera.position.clone().setLength(15),V())});
-tog('bCase',b=>{const h=b.classList.toggle('on');b.textContent=h?(IS_PHONE?'Show':'Show case'):(IS_PHONE?'Case':'Hide case');CASE.forEach(k=>parts[k].forEach(o=>o.visible=!h))});
-tog('bSpin',b=>{controls.autoRotate=b.classList.toggle('on')});
-tog('bPause',b=>{paused=b.classList.toggle('on');b.textContent=paused?'Play':'Pause'});
-tog('bLapse',b=>{lapse=LAPSES[(LAPSES.indexOf(lapse)+1)%3];b.textContent=(IS_PHONE?'×':'Time ×')+lapse});
-const d0=new Date();hs=d0.getHours()*3600+d0.getMinutes()*60+d0.getSeconds()+d0.getMilliseconds()/1000;
+tog('bEx',b=>{exT=exT?0:1;b.classList.toggle('on',!!exT);b.setAttribute('aria-pressed',String(!!exT));if(exT&&controls?.getDistance?.()<14)flyTo(camera.position.clone().setLength(15),V())});
+tog('bCase',b=>{const h=b.classList.toggle('on');b.setAttribute('aria-pressed',String(h));b.textContent=h?'Show case':'Hide case';CASE.forEach(k=>parts[k].forEach(o=>o.visible=!h))});
+tog('bSpin',b=>{const on=b.classList.toggle('on');b.setAttribute('aria-pressed',String(on));if(controls)controls.autoRotate=on});
+tog('bPause',b=>{
+ paused=b.classList.toggle('on');b.setAttribute('aria-pressed',String(paused));b.textContent=paused?'Play':'Pause';
+ if(paused)tickPlayer.pause();else if(tickOn)startTickPlayback()
+});
+tog('bLapse',b=>{
+ lapse=LAPSES[(LAPSES.indexOf(lapse)+1)%3];b.textContent='Time ×'+lapse;
+ b.title=lapse===1?'Synced to your device clock':'Demonstration speed; return to ×1 to resync';
+ b.setAttribute('aria-label','Time speed times '+lapse+(lapse===1?', synced to device clock':''))
+});
+const actualSeconds=()=>{const d=new Date();return d.getHours()*3600+d.getMinutes()*60+d.getSeconds()+d.getMilliseconds()/1000};
+hs=actualSeconds();
+
+/* ---------- recorded 18,000 vph automatic movement tick ---------- */
+let tickOn=false;
+const tickPlayer=$('tickAudio');
+tickPlayer.volume=.18;
+function startTickPlayback(){
+ const nextBeat=(1-(tm*2.5%1))/2.5;
+ tickPlayer.play().then(()=>{
+  if(!tickOn){tickPlayer.pause();return}
+  tickPlayer.currentTime=(.06-nextBeat+5)%5
+ }).catch(()=>{tickOn=false;$('bTick').classList.remove('on');$('bTick').setAttribute('aria-pressed','false');$('bTick').textContent='Tap To Enable Tick'})
+}
+function setTick(on){
+ tickOn=on;$('bTick').classList.toggle('on',on);$('bTick').setAttribute('aria-pressed',String(on));$('bTick').textContent=on?'Tick Off':'Tick On';
+ if(!on){tickPlayer.pause();tickPlayer.currentTime=0;return}
+ startTickPlayback()
+}
+$('bTick').onclick=()=>setTick(!tickOn);
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden&&tickOn&&!paused)startTickPlayback();
+ else if(document.hidden)tickPlayer.pause()
+});
 
 /* ---------- picking ---------- */
 const ray=new THREE.Raycaster(),ptr=new THREE.Vector2(),tip=$('tip');let down=null;
 const hov=[];watch.traverse(m=>{if(m.isMesh&&!['crystal','backGlass'].includes(m.userData.key))hov.push(m)});
 const vis=o=>{for(;o;o=o.parent)if(!o.visible)return false;return true};
 const pick=e=>{ptr.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(ptr,camera);const h=ray.intersectObjects(hov,false).find(h=>vis(h.object));return h&&h.object.userData.key};
-addEventListener('pointermove',e=>{if(e.pointerType==='touch'){tip.style.opacity=0;return}if(e.target!==renderer.domElement){tip.style.opacity=0;return}const k=pick(e);
- if(k){tip.textContent=I[k][0];tip.style.left=e.clientX+14+'px';tip.style.top=e.clientY+14+'px';tip.style.opacity=1}else tip.style.opacity=0;renderer.domElement.style.cursor=k?'pointer':'grab'});
+let hoverEvent=null,hoverQueued=false;
+function updateHover(){hoverQueued=false;const e=hoverEvent;if(!e)return;
+ if(e.pointerType==='touch'||e.target!==renderer.domElement){tip.style.opacity=0;return}
+ const k=pick(e);
+ if(k){tip.textContent=I[k][0];tip.style.left=Math.min(e.clientX+14,innerWidth-130)+'px';tip.style.top=e.clientY+14+'px';tip.style.opacity=1}
+ else tip.style.opacity=0;
+ renderer.domElement.style.cursor=k?'pointer':'grab'}
+addEventListener('pointermove',e=>{hoverEvent=e;if(!hoverQueued){hoverQueued=true;requestAnimationFrame(updateHover)}},{passive:true});
 renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
 renderer.domElement.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<5)select(pick(e)||null);down=null});
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer)composer.setSize(innerWidth,innerHeight)});
+
+const bar=$('bar'),barPrev=$('barPrev'),barNext=$('barNext');
+function updateBarCue(){
+ const more=bar.scrollWidth-bar.clientWidth>2;
+ const atStart=bar.scrollLeft<=3;
+ const atEnd=bar.scrollLeft+bar.clientWidth>=bar.scrollWidth-3;
+ barPrev.classList.toggle('on',more);barNext.classList.toggle('on',more);
+ barPrev.disabled=!more||atStart;barNext.disabled=!more||atEnd
+}
+bar.addEventListener('scroll',updateBarCue,{passive:true});
+if('ResizeObserver'in window)new ResizeObserver(()=>requestAnimationFrame(updateBarCue)).observe(bar);
+function scrollBar(dir){
+ bar.scrollBy({left:dir*Math.max(180,bar.clientWidth*.72),behavior:reduceMotion?'auto':'smooth'})
+}
+barPrev.onclick=()=>scrollBar(-1);barNext.onclick=()=>scrollBar(1);
+bar.addEventListener('wheel',e=>{
+ if(bar.scrollWidth<=bar.clientWidth)return;
+ const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+ if(delta){e.preventDefault();bar.scrollLeft+=delta}
+},{passive:false});
+bar.addEventListener('keydown',e=>{
+ if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();scrollBar(e.key==='ArrowLeft'?-1:1)}
+});
+let barTouch=null,barHorizontal=false,suppressBarClick=false;
+bar.addEventListener('touchstart',e=>{
+ if(e.touches.length!==1)return;
+ const t=e.touches[0];barTouch={x:t.clientX,y:t.clientY,scroll:bar.scrollLeft};barHorizontal=false
+},{passive:true});
+bar.addEventListener('touchmove',e=>{
+ if(!barTouch||e.touches.length!==1)return;
+ const t=e.touches[0],dx=t.clientX-barTouch.x,dy=t.clientY-barTouch.y;
+ if(!barHorizontal&&Math.abs(dx)>5&&Math.abs(dx)>Math.abs(dy))barHorizontal=true;
+ if(!barHorizontal)return;
+ e.preventDefault();suppressBarClick=true;bar.scrollLeft=barTouch.scroll-dx
+},{passive:false});
+const endBarTouch=()=>{barTouch=null;setTimeout(()=>{suppressBarClick=false},80)};
+bar.addEventListener('touchend',endBarTouch,{passive:true});bar.addEventListener('touchcancel',endBarTouch,{passive:true});
+bar.addEventListener('click',e=>{if(suppressBarClick){e.preventDefault();e.stopPropagation()}},true);
+
+function resizeRenderer(){
+ const cap=LOW_POWER?1.2:IS_MOBILE?(innerWidth<420?1.35:1.5):2;
+ const dpr=Math.min(devicePixelRatio||1,cap);
+ camera.aspect=innerWidth/innerHeight;camera.fov=IS_MOBILE?42:32;camera.updateProjectionMatrix();
+ renderer.setPixelRatio(dpr);renderer.setSize(innerWidth,innerHeight);
+ if(composer){composer.setPixelRatio(dpr);composer.setSize(innerWidth,innerHeight)}
+ const shadowRes=LOW_POWER?768:IS_MOBILE?1024:2048;
+ if(key.shadow.mapSize.x!==shadowRes){
+  key.shadow.mapSize.set(shadowRes,shadowRes);
+  if(key.shadow.map){key.shadow.map.dispose();key.shadow.map=null}
+ }
+ requestAnimationFrame(updateBarCue)
+}
+function syncResponsiveUI(){
+ const changed=IS_MOBILE!==mobileQuery.matches;IS_MOBILE=mobileQuery.matches;
+ if(IS_MOBILE){
+  $('info').style.removeProperty('display');
+  if(!$('side').classList.contains('on')){$('side').setAttribute('aria-hidden','true');$('mParts').setAttribute('aria-expanded','false')}
+ }else{
+  $('side').classList.remove('on');$('side').setAttribute('aria-hidden','false');
+  $('mParts').setAttribute('aria-expanded','false');$('backdrop').classList.remove('on');
+  $('info').style.display=$('info').classList.contains('on')?'block':'none'
+ }
+ if(changed)resizeRenderer();else requestAnimationFrame(updateBarCue)
+}
+addEventListener('resize',()=>requestAnimationFrame(()=>{syncResponsiveUI();resizeRenderer()}));
+if(mobileQuery.addEventListener)mobileQuery.addEventListener('change',syncResponsiveUI);else mobileQuery.addListener(syncResponsiveUI);
+requestAnimationFrame(()=>{syncResponsiveUI();resizeRenderer()});
 
 /* ---------- energy-flow tour ---------- */
 const hotMat=new THREE.MeshBasicMaterial({color:new THREE.Color(2.6,1.7,.55),toneMapped:false});
@@ -484,10 +872,21 @@ const TOUR=[
 ['Fourth wheel','front',['fourthWheel'],'fourth','The fourth wheel turns once a minute and carries the seconds hand. Every wheel in the train advances in small steps, one per beat.'],
 ['Escape wheel','front',['escapeWheel'],'esc','The escape wheel receives that energy, but its teeth are held back and released one at a time. This stops the train from simply unwinding in a rush.'],
 ['Pallet fork','front',['palletFork'],'pal','Ruby pallets lock and release the escape wheel with each beat, and give the balance a small kick of energy each swing. That is the “tick”.'],
-['Balance & hairspring','front',['balance','hairspring'],'bal','The balance and hairspring oscillate about four times a second. They set the pace for the whole train, and that steady rhythm is what keeps time.'],
+['Balance & hairspring','front',['balance','hairspring'],'bal','The balance and hairspring oscillate 2.5 times a second. They set the pace for the whole train, and that steady rhythm is what keeps time.'],
 ['Rotor','rear',['rotor','bearing'],'rotor','Now round the back: movement of your wrist swings the rotor on its ball bearing. This is how an automatic watch winds itself.'],
 ['Winding train','rear',['reverser','reducer'],'red','The rotor drives the reversing and reduction wheels, which gear the swing down and send it to the spring in a single winding direction.'],
 ['Ratchet & click','rear',['ratchet','click','crownWheel'],'rat','The ratchet winds the mainspring and the click stops it slipping back. The energy is back in the barrel, and the cycle begins again.']];
+const TOUR_SIMPLE=[
+'The mainspring is the watch’s battery: it stores energy and releases it slowly as it unwinds.',
+'The first gear receives that energy and turns once an hour. It also carries the minute hand.',
+'This middle gear passes the energy onward and increases the movement’s speed.',
+'The fourth wheel turns once a minute and drives the seconds hand.',
+'The escape wheel releases the stored power in small, controlled steps.',
+'The pallet fork alternately locks and frees the escape wheel. That quick action is the tick.',
+'The balance wheel swings back and forth like a pendulum. The hairspring keeps that rhythm steady.',
+'At the back, your arm movement swings the rotor. This is what makes the watch automatic.',
+'The winding gears turn the rotor’s movement in either direction into winding motion.',
+'The ratchet gathers that motion into the mainspring, and the click stops it unwinding backward.'];
 const segs=TOUR.map((t,i)=>{if(!i||TOUR[i-1][1]!==t[1])return null;const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(WP[TOUR[i-1][3]],WP[t[3]]),8,.016,8,false),hotMat);m.visible=false;flow.add(m);return m});
 const tour={on:false,i:0,m:[],et:0},HANDS=['hour','minute','second'];
 function tourGlow(keys){
@@ -497,26 +896,79 @@ function tourGlow(keys){
   tour.m.push([m,m.material]);m.material=Array.isArray(m.material)?c:c[0]})}
 function focusKeys(keys,side){const b=new THREE.Box3();keys.forEach(k=>parts[k].forEach(o=>b.expandByObject(o)));
  const c=b.getCenter(V()),sz=b.getSize(V()).length(),dir=(side=='rear'?V(.3,-.3,-1):V(.2,-.25,1)).normalize();
- flyTo(c.clone().addScaledVector(dir,Math.max(3.2,sz*2+1.4)),c)}
+ flyTo(c.clone().addScaledVector(dir,Math.max(3.2,sz*2+1.4)*(IS_MOBILE?1.35:1)),c)}
+function renderTourText(){
+ if(!tour.on)return;
+ $('ttext').textContent=depth==='simple'?TOUR_SIMPLE[tour.i]:TOUR[tour.i][4]
+}
 function goTour(i){
  if(i<0)return;if(i>=TOUR.length){endTour();return}
- tour.i=i;tour.et=0;const [n,side,keys,,txt]=TOUR[i];
- $('tstep').textContent='Step '+(i+1)+' of '+TOUR.length+' · '+(side=='rear'?'Rear':'Front');$('tname').textContent=n;$('ttext').textContent=txt;
- $('tnext').textContent=i==TOUR.length-1?'Finish':'Next ›';$('tprev').style.opacity=i?1:.4;
+ tour.i=i;tour.et=0;const [n,side,keys]=TOUR[i];
+ $('tstep').textContent='Step '+(i+1)+' of '+TOUR.length+' · '+(side=='rear'?'Rear':'Front');$('tname').textContent=n;renderTourText();
+ $('tprog').style.width=((i+1)/TOUR.length*100)+'%';
+ $('tnext').textContent=i==TOUR.length-1?'Finish':'Next ›';$('tprev').disabled=i===0;
  tourGlow(keys);segs.forEach((m,j)=>{if(m)m.visible=j<=i&&TOUR[j][1]===side});focusKeys(keys,side)}
-function startTour(){select(null);exT=0;const be=$('bEx');if(be)be.classList.remove('on');
+function startTour(){select(null);exT=0;const be=$('bEx');if(be){be.classList.remove('on');be.setAttribute('aria-pressed','false')}
  tour.on=true;flow.visible=true;orb.visible=true;HANDS.forEach(k=>parts[k].forEach(o=>o.visible=false));
- $('tour').style.display='block';$('bTour').classList.add('on');goTour(0)}
+ $('tour').classList.remove('min');$('tmin').setAttribute('aria-expanded','true');$('tmin').setAttribute('aria-label','Minimise tour');$('tmin').title='Minimise tour';$('tmin').textContent='−';
+ $('tour').style.display='block';$('bTour').classList.add('on');$('bTour').setAttribute('aria-pressed','true');goTour(0)}
 function endTour(){tour.on=false;tourGlow([]);flow.visible=false;orb.visible=false;HANDS.forEach(k=>parts[k].forEach(o=>o.visible=true));
- $('tour').style.display='none';$('bTour').classList.remove('on')}
+ $('tour').style.display='none';$('tour').classList.remove('min');$('bTour').classList.remove('on');$('bTour').setAttribute('aria-pressed','false')}
 $('bTour').onclick=()=>tour.on?endTour():startTour();
 $('tnext').onclick=()=>goTour(tour.i+1);$('tprev').onclick=()=>goTour(tour.i-1);$('tx').onclick=endTour;
+$('tmin').onclick=()=>{
+ const min=$('tour').classList.toggle('min');
+ $('tmin').setAttribute('aria-expanded',String(!min));
+ $('tmin').setAttribute('aria-label',min?'Expand tour':'Minimise tour');
+ $('tmin').title=min?'Expand tour':'Minimise tour';
+ $('tmin').textContent=min?'+':'−'
+};
+addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if($('glossary').classList.contains('on'))closeGlossary();
+ else if(tour.on)endTour();
+ else if($('info').classList.contains('on'))select(null);
+ else if(IS_MOBILE&&$('side').classList.contains('on'))closePartsDrawer()
+});
+setDepth('simple');
 function tourTick(dt){
  if(!tour.on)return;tour.et+=dt;const et=tour.et,t=TOUR[tour.i],cur=WP[t[3]],prev=segs[tour.i]?WP[TOUR[tour.i-1][3]]:null;
  if(prev){const u=(et*.55)%1;orb.position.lerpVectors(prev,cur,u*u*(3-2*u))}
  else orb.position.set(cur.x+Math.cos(et*2.4)*.34,cur.y+Math.sin(et*2.4)*.34,cur.z);
- orb.scale.setScalar(1+.25*Math.sin(et*9));
- const v=1.4+.6*Math.sin(et*5);tour.m.forEach(([m])=>(Array.isArray(m.material)?m.material:[m.material]).forEach(x=>x.emissiveIntensity=v))}
+ orb.scale.setScalar(reduceMotion?1:1+.25*Math.sin(et*9));
+ const v=reduceMotion?1.55:1.4+.6*Math.sin(et*5);tour.m.forEach(([m])=>(Array.isArray(m.material)?m.material:[m.material]).forEach(x=>x.emissiveIntensity=v))}
+
+/* ---------- optional projected labels ---------- */
+const labelRoot=$('labels'),labelPoint=V();
+const LABEL_GROUPS={
+ front:['barrel','centerWheel','escapeWheel','palletFork','balance','crown'],
+ rear:['rotor','bearing','reverser','ratchet','crownWheel'],
+ side:['crown','caseMid','lugs']
+};
+const labelEntries=Object.entries(LABEL_GROUPS).flatMap(([side,keys])=>keys.map(k=>({key:k,side,el:(()=>{
+ const b=document.createElement('button');b.type='button';b.className='scene-label';b.textContent=I[k][0];
+ b.setAttribute('aria-label','Show '+I[k][0]);b.onclick=()=>select(k,true);labelRoot.appendChild(b);return b
+})()}))).filter((entry,i,all)=>all.findIndex(x=>x.key===entry.key)===i);
+const labelsOnRef={value:false};
+function setLabels(on){
+ labelsOnRef.value=on;$('bLabels').classList.toggle('on',on);$('bLabels').setAttribute('aria-pressed',String(on));
+ if(!on)labelEntries.forEach(x=>x.el.classList.remove('show'))
+}
+$('bLabels').onclick=()=>setLabels(!labelsOnRef.value);
+function updateLabels(){
+ if(!labelsOnRef.value||tour.on){labelEntries.forEach(x=>x.el.classList.remove('show'));return}
+ const dist=camera.position.length(),frontness=Math.abs(camera.position.z)/Math.max(dist,.001);
+ const group=frontness<.3?'side':camera.position.z>0?'front':'rear';
+ labelEntries.forEach(({key,side,el})=>{
+  const o=parts[key]?.[0];
+  if(side!==group||!o||!vis(o)){el.classList.remove('show');return}
+  o.getWorldPosition(labelPoint).project(camera);
+  const x=(labelPoint.x*.5+.5)*innerWidth,y=(-labelPoint.y*.5+.5)*innerHeight;
+  const visible=labelPoint.z>-1&&labelPoint.z<1&&x>54&&x<innerWidth-54&&y>36&&y<innerHeight-(IS_MOBILE?92:82);
+  el.classList.toggle('show',visible);
+  if(visible){el.style.left=x+'px';el.style.top=y+'px'}
+ })
+}
 
 /* ---------- true meshing: initial tooth phase so neighbouring gears interlock ---------- */
 const frac=x=>x-Math.floor(x);
@@ -528,13 +980,26 @@ TH.rat=meshAngle(TH.red,red.position,36,rat.position,50);TH.crw=meshAngle(TH.rat
 const stp=(v,rate)=>{const f=v*rate,n=Math.floor(f),u=Math.min(1,(f-n)/.18);return (n+u*u*(3-2*u))/rate};
 
 /* ---------- animation ---------- */
-const clock=new THREE.Clock();let tm=0;
+const explodeObjects=Object.values(parts).flat().filter(o=>o.userData.p0);
+const clock=new THREE.Clock();let tm=0,firstFrameRendered=false,postQueued=false,batchQueued=false;
+const scheduleIdle=window.requestIdleCallback?fn=>window.requestIdleCallback(fn,{timeout:900}):fn=>setTimeout(fn,90);
+function afterFirstPaint(){
+ const loader=$('loader');
+ if(loader){$('loadStatus').textContent='Movement ready';loader.classList.add('hide')}
+ $('app').setAttribute('aria-busy','false');
+ window.__watchFirstPaintMs=Math.round(performance.now());
+ if(!batchQueued){batchQueued=true;scheduleIdle(()=>optimiseGeometry())}
+ if(!postQueued){postQueued=true;scheduleIdle(()=>setupPostProcessing())}
+}
 (function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.1);
- if(!paused){tm+=dt;hs+=dt*lapse}
- ex+=(exT-ex)*Math.min(1,dt*4);
- for(const k in parts)parts[k].forEach(o=>{if(o.userData.p0)o.position.copy(o.userData.p0).addScaledVector(o.userData.ex,ex)});
+ if(!paused){tm+=dt;if(lapse===1)hs=actualSeconds();else hs+=dt*lapse}
+ if(ex!==exT){
+  ex+=(exT-ex)*Math.min(1,dt*4);
+  if(Math.abs(exT-ex)<.0005)ex=exT;
+  for(const o of explodeObjects)o.position.copy(o.userData.p0).addScaledVector(o.userData.ex,ex)
+ }
  // escapement: one beat = half balance oscillation; everything steps on the beat
- const bt=tm*4,fl=Math.floor(bt),uu=Math.min(1,(bt-fl)/.22),S=fl+uu*uu*(3-2*uu);
+ const bt=tm*2.5,fl=Math.floor(bt),uu=Math.min(1,(bt-fl)/.22),S=fl+uu*uu*(3-2*uu);
  bal.rotation.z=1.5*Math.sin(PI*bt);pal.rotation.z=.13*Math.tanh(8*Math.sin(PI*bt));ew.rotation.z=S*PI/15;
  // going train: Δθ_B = -(N_A/N_B)·Δθ_A keeps every tooth pair interlocked
  const df=-S*.07,dT=-(32/40)*df,dC=-(40/48)*dT,dB=-(48/62)*dC;
@@ -543,10 +1008,12 @@ const clock=new THREE.Clock();let tm=0;
  const ra=tm*.45+.35*Math.sin(tm*1.1);rotG.rotation.z=ra;
  rv1.rotation.z=TH.v1-(30/32)*ra;rv2.rotation.z=TH.v2-(30/32)*ra;
  const dR=-(30/36)*ra,dRt=-(36/50)*dR;red.rotation.z=TH.red+dR;rat.rotation.z=TH.rat+dRt;crw.rotation.z=TH.crw-(50/36)*dRt;
- // hands move in real 8-beat-per-second steps
- const hq=stp(hs,8);hS.rotation.z=-(hq%60)/60*2*PI;hM.rotation.z=-(hq%3600)/3600*2*PI;hH.rotation.z=-(hq%43200)/43200*2*PI;
+ // Hands follow real device time in five beat-aligned steps per second.
+ const shownSeconds=paused?hs:lapse===1?actualSeconds():hs;
+ const hq=stp(shownSeconds,5);hS.rotation.z=-(hq%60)/60*2*PI;hM.rotation.z=-(hq%3600)/3600*2*PI;hH.rotation.z=-(hq%43200)/43200*2*PI;
  if(fly){fly.s+=dt/1.1;const k=fly.s>=1?1:1-Math.pow(1-fly.s,3);camera.position.lerpVectors(fly.p0,fly.p1,k);controls.target.lerpVectors(fly.t0,fly.t1,k);if(fly.s>=1)fly=null}
  {const g=performance.now()*.001;glowG.emissiveIntensity=.55+.12*Math.sin(g*1.6);glowS.emissiveIntensity=.5+.1*Math.sin(g*1.6);glowB.emissiveIntensity=.45+.1*Math.sin(g*1.6+1)}
  if(film)film.uniforms.time.value=performance.now()*.001;
- hl();tourTick(dt);controls.update();composer?composer.render():renderer.render(scene,camera)})();
+ hl();tourTick(dt);controls?.update();updateLabels();composer?composer.render():renderer.render(scene,camera);
+ if(!firstFrameRendered){firstFrameRendered=true;requestAnimationFrame(afterFirstPaint)}})();
 </script></body></html>
